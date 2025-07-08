@@ -9,6 +9,7 @@ import {
 import customFetch from "../utils/customFetch";
 import { toast } from "react-toastify";
 
+// Seus tipos
 type Usuario = {
   _id: string;
   nome: string;
@@ -20,8 +21,11 @@ type Usuario = {
   avatar?: string;
 };
 
+// ### CORREÇÃO #1 ###
+// Adicionamos 'setUsuario' de volta ao tipo do contexto
 type AuthContextType = {
   usuario: Usuario | null;
+  setUsuario: (usuario: Usuario | null) => void; // <--- ADICIONADO DE VOLTA
   isLoading: boolean;
   login: (token: string) => Promise<void>;
   logout: () => Promise<void>;
@@ -33,6 +37,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [usuario, setUsuario] = useState<Usuario | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  // A função fetchCurrentUser com useCallback está correta para evitar loops
   const fetchCurrentUser = useCallback(async () => {
     try {
       const { data } = await customFetch.get("/usuarios/atual-usuario");
@@ -43,6 +48,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   }, []);
 
+  // A função login com useCallback está correta
   const login = useCallback(
     async (token: string) => {
       localStorage.setItem("token", token);
@@ -51,21 +57,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     [fetchCurrentUser]
   );
 
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      fetchCurrentUser();
-    }
-    setIsLoading(false);
-  }, [fetchCurrentUser]);
-
+  // A função logout com useCallback está correta
   const logout = useCallback(async () => {
     try {
       await customFetch.get("/auth/logout");
       setUsuario(null);
       localStorage.removeItem("token");
       toast.success("Logout realizado com sucesso!");
-      // Força um redirecionamento para garantir que o estado seja limpo em toda a aplicação
       window.location.href = "/";
     } catch (error) {
       console.error("Erro ao fazer logout:", error);
@@ -73,9 +71,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   }, []);
 
+  // O useEffect inicial está correto
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      fetchCurrentUser().finally(() => setIsLoading(false));
+    } else {
+      setIsLoading(false);
+    }
+  }, [fetchCurrentUser]);
+
+  // ### CORREÇÃO #2 ###
+  // Adicionamos 'setUsuario' de volta ao valor que o Provider oferece
+  const contextValue = { usuario, setUsuario, login, logout, isLoading };
+
   return (
-    <AuthContext.Provider value={{ usuario, login, logout, isLoading }}>
-      {/* Não mostra nada até que a verificação inicial do usuário seja concluída */}
+    <AuthContext.Provider value={contextValue}>
       {!isLoading && children}
     </AuthContext.Provider>
   );

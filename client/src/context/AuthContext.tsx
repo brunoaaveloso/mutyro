@@ -22,6 +22,7 @@ type Usuario = {
 
 type AuthContextType = {
   usuario: Usuario | null;
+  setUsuario: (usuario: Usuario | null) => void;
   isLoading: boolean;
   login: (token: string) => Promise<void>;
   logout: () => Promise<void>;
@@ -33,35 +34,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [usuario, setUsuario] = useState<Usuario | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Função para buscar o usuário atual, agora reutilizável
   const fetchCurrentUser = useCallback(async () => {
     try {
       const { data } = await customFetch.get("/usuarios/atual-usuario");
       setUsuario(data.usuario);
     } catch (error) {
-      // Se a busca falhar (ex: token inválido), desloga o usuário
       setUsuario(null);
       localStorage.removeItem("token");
+    } finally {
+      setIsLoading(false);
     }
   }, []);
 
-  // Nova função para lidar com o login
   const login = async (token: string) => {
-    // 1. Salva o novo token no localStorage
     localStorage.setItem("token", token);
-    // 2. Imediatamente busca os dados completos do usuário usando o novo token
     await fetchCurrentUser();
   };
-
-  // Verifica o usuário no carregamento inicial da página
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      fetchCurrentUser();
-    } else {
-      setIsLoading(false);
-    }
-  }, [fetchCurrentUser]);
 
   const logout = async () => {
     try {
@@ -73,20 +61,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       console.error("Erro ao fazer logout:", error);
       toast.error("Erro ao fazer logout");
     } finally {
-      // Redireciona para a home após o logout para garantir a atualização
       window.location.href = "/";
     }
   };
 
-  // Log para depuração
   useEffect(() => {
-    if (!isLoading) {
-      console.log("Estado de autenticação finalizado. Usuário:", usuario);
+    const token = localStorage.getItem("token");
+    if (token) {
+      fetchCurrentUser();
+    } else {
+      setIsLoading(false);
     }
-  }, [usuario, isLoading]);
+  }, [fetchCurrentUser]);
+
+  const contextValue = { usuario, setUsuario, login, logout, isLoading };
 
   return (
-    <AuthContext.Provider value={{ usuario, login, logout, isLoading }}>
+    <AuthContext.Provider value={contextValue}>
       {isLoading ? <div>Carregando...</div> : children}
     </AuthContext.Provider>
   );

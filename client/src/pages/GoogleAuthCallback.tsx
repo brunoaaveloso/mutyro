@@ -1,34 +1,34 @@
-import { useEffect, useContext } from "react";
+import { useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { AuthContext } from "../context/AuthContext";
+import { useAuth } from "../context/AuthContext";
 
 const GoogleAuthCallback = () => {
+  const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const auth = useContext(AuthContext);
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const token = params.get("token");
 
-    if (token && auth) {
-      // 1. Salva o token no localStorage
-      localStorage.setItem("token", token);
-      console.log("Token recebido do URL e salvo no localStorage.");
+    if (token && login) {
+      console.log(
+        "Token recebido do URL. Iniciando processo de login no contexto..."
+      );
 
-      // 2. ATUALIZA O ESTADO GLOBAL DA APLICAÇÃO
-      auth.login(token);
-
-      console.log("Contexto de autenticação atualizado.");
-
-      navigate("/user", { replace: true });
+      login(token).then(() => {
+        console.log(
+          "Contexto de autenticação atualizado. Redirecionando para /user."
+        );
+        navigate("/user", { replace: true });
+      });
     } else {
       console.error(
-        "Callback do Google sem token ou contexto de autenticação indisponível."
+        "Callback do Google sem token ou função de login indisponível."
       );
       navigate("/login", { replace: true });
     }
-  }, [navigate, location, auth]);
+  }, [navigate, location, login]);
 
   return <div>Finalizando seu login...</div>;
 };

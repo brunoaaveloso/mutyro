@@ -1,12 +1,18 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
+import { nodePolyfills } from "vite-plugin-node-polyfills";
 
-// https://vite.dev/config/
+// https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react(),
+    nodePolyfills({
+      protocolImports: true,
+    }),
+  ],
   resolve: {
     alias: {
-      "@": "/src", // caminho absoluto para src, sem usar path ou __dirname
+      "@": "/src",
     },
   },
   server: {
@@ -14,17 +20,37 @@ export default defineConfig({
     port: 5173,
     proxy: {
       "/api": {
-        //target: "http://backend:5100",
         target: "http://localhost:5100",
         changeOrigin: true,
         secure: false,
+        rewrite: (path) => path.replace(/^\/api/, ""),
       },
     },
-    allowedHosts: [
-      "mutyro.com.br",
-      "www.mutyro.com.br",
-      "localhost",
-      "127.0.0.1",
+  },
+  build: {
+    target: "es2020",
+    rollupOptions: {
+      external: [
+        /^node:.*/,
+        "@rollup/rollup-linux-x64-gnu"
+      ],
+      output: {
+        manualChunks: {
+          react: ["react", "react-dom"],
+          leaflet: ["leaflet", "react-leaflet"],
+          utils: ["date-fns", "lodash.debounce", "clsx"],
+        },
+      },
+    },
+    chunkSizeWarningLimit: 1600,
+  },
+  optimizeDeps: {
+    include: [
+      "react",
+      "react-dom",
+      "react-router-dom",
+      "styled-components"
     ],
+    exclude: ["@rollup/rollup-linux-x64-gnu"],
   },
 });

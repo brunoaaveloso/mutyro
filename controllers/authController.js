@@ -46,7 +46,8 @@ export const login = async (req, res) => {
   res.cookie("token", token, {
     httpOnly: true,
     expires: new Date(Date.now() + oneDAY),
-    secure: process.env.NODE_ENV === "production", // Define como true se estiver em ambiente de produção
+    secure: true,
+    sameSite: "none",
   });
 
   // Enviando os dados do usuário na resposta

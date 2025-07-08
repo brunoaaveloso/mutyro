@@ -1,9 +1,10 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { nodePolyfills } from "vite-plugin-node-polyfills";
+import path from "path";
 
-// https://vitejs.dev/config/
 export default defineConfig({
+  base: "/", // Configuração essencial para o Vercel
   plugins: [
     react(),
     nodePolyfills({
@@ -12,7 +13,7 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
-      "@": "/src",
+      "@": path.resolve(__dirname, "./src"), // Caminho absoluto mais seguro
     },
   },
   server: {
@@ -28,6 +29,8 @@ export default defineConfig({
     },
   },
   build: {
+    outDir: "dist", // Explícito para o Vercel
+    emptyOutDir: true, // Limpa o diretório antes de buildar
     target: "es2020",
     rollupOptions: {
       external: [
@@ -39,18 +42,34 @@ export default defineConfig({
           react: ["react", "react-dom"],
           leaflet: ["leaflet", "react-leaflet"],
           utils: ["date-fns", "lodash.debounce", "clsx"],
+          vendor: ["axios", "react-router-dom"], // Adicionado para melhor cache
         },
+        chunkFileNames: "assets/[name]-[hash].js", // Nomeação consistente
       },
     },
-    chunkSizeWarningLimit: 1600,
+    chunkSizeWarningLimit: 2000, // Aumentado para projetos grandes
   },
   optimizeDeps: {
     include: [
       "react",
       "react-dom",
       "react-router-dom",
-      "styled-components"
+      "styled-components",
+      "lucide-react" // Adicionado para otimização
     ],
-    exclude: ["@rollup/rollup-linux-x64-gnu"],
+    exclude: [
+      "@rollup/rollup-linux-x64-gnu",
+      "react-big-calendar" // Melhora tempo de build
+    ],
   },
+  css: {
+    modules: {
+      localsConvention: "camelCase",
+    },
+    preprocessorOptions: {
+      scss: {
+        additionalData: `@import "@/styles/variables.scss";` // Se usar SCSS
+      }
+    }
+  }
 });

@@ -37,12 +37,13 @@ const __dirname = dirname(__filename);
 // Configuração do express-session
 app.use(
   session({
-    secret: process.env.JWT_SECRET, 
+    secret: process.env.JWT_SECRET,
     resave: false, // Não salva a sessão novamente se não houver alterações
     saveUninitialized: true, // Salva sessões não inicializadas
     cookie: {
-      secure: false, 
-      maxAge: 1000 * 60 * 60 * 24, // 1 dia
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "none",
+      maxAge: 1000 * 60 * 60 * 24,
     },
   })
 );
@@ -83,7 +84,7 @@ app.use(
   cors({
     origin: [
       "http://localhost:5173", // Dev
-      "https://mutyro.vercel.app" // Produção
+      "https://mutyro.vercel.app", // Produção
     ],
     credentials: true,
   })
@@ -134,7 +135,9 @@ try {
   await mongoose.connect(process.env.MONGO_URL);
   app.listen(port, async () => {
     console.log(`Servidor rodando na porta ${port}....`);
-    console.log(`Swagger docs disponíveis em: http://localhost:${port}/api-docs`);
+    console.log(
+      `Swagger docs disponíveis em: http://localhost:${port}/api-docs`
+    );
     await iniciarVerificacaoPeriodica();
   });
 } catch (error) {

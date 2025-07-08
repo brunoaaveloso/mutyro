@@ -3,55 +3,84 @@ import react from "@vitejs/plugin-react";
 import { nodePolyfills } from "vite-plugin-node-polyfills";
 import path from "path";
 
+// Configuração alinhada com tsconfig.node.json (ES2022) e tsconfig.app.json (ES2020)
 export default defineConfig({
   base: "/",
   plugins: [
     react({
-      jsxImportSource: "react", // Alinhado com seu tsconfig.app.json (react-jsx)
+      jsxImportSource: "react",
+      babel: {
+        plugins: ["@babel/plugin-transform-react-jsx"]
+      }
     }),
     nodePolyfills({
       protocolImports: true,
+      globals: {
+        Buffer: true,
+        global: true,
+        process: true,
+      }
     }),
   ],
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./src"), // Alinhado com paths do tsconfig
+      "@": path.resolve(__dirname, "./src"),
+      "~": path.resolve(__dirname, "./") // Adicionado para acesso à raiz
     },
-    extensions: [".ts", ".tsx", ".js", ".jsx"], // Compatível com moduleResolution bundler
+    extensions: [
+      ".ts", ".tsx", ".js", ".jsx", 
+      ".json", ".mjs" // Adicionado para módulos modernos
+    ],
   },
   server: {
     host: true,
     port: 5173,
+    strictPort: true,
     proxy: {
       "/api": {
         target: "http://localhost:5100",
         changeOrigin: true,
         secure: false,
         rewrite: (path) => path.replace(/^\/api/, ""),
+        configure: (proxy) => {
+          proxy.on("error", (err) => {
+            console.error("Proxy Error:", err);
+          });
+        }
       },
     },
   },
   build: {
-    target: "es2020", // Alinhado com seu tsconfig
+    target: "es2022", // Alinhado com tsconfig.node.json
     outDir: "dist",
     emptyOutDir: true,
+    cssTarget: "es2022", // CSS moderno
     rollupOptions: {
       external: [
         /^node:.*/,
-        "@rollup/rollup-linux-x64-gnu"
+        "@rollup/rollup-linux-x64-gnu",
+        "react-big-calendar" // Adicionado para otimização
       ],
       output: {
-        manualChunks: {
-          react: ["react", "react-dom"],
-          leaflet: ["leaflet", "react-leaflet"],
-          utils: ["date-fns", "lodash.debounce", "clsx"],
-          vendor: ["axios", "react-router-dom"],
+        manualChunks: (id) => {
+          if (id.includes("node_modules")) {
+            if (id.includes("react") || id.includes("react-dom")) {
+              return "vendor-react";
+            }
+            if (id.includes("leaflet")) {
+              return "vendor-leaflet";
+            }
+            return "vendor";
+          }
         },
-        format: "esm", // Alinhado com module ESNext
-        chunkFileNames: "assets/[name]-[hash].js",
+        format: "esm",
+        chunkFileNames: "assets/[name]-[hash].mjs", // Extensão .mjs para módulos
+        assetFileNames: "assets/[name]-[hash][extname]",
+        entryFileNames: "assets/[name]-[hash].mjs",
       },
     },
-    chunkSizeWarningLimit: 2000,
+    chunkSizeWarningLimit: 2500, // Aumentado para projetos grandes
+    minify: "esbuild", // Otimizado para ES2022
   },
   optimizeDeps: {
     include: [
@@ -59,16 +88,40 @@ export default defineConfig({
       "react-dom",
       "react-router-dom",
       "styled-components",
-      "lucide-react"
+      "lucide-react",
+      "date-fns" // Adicionado para pré-empacotamento
     ],
     exclude: [
-      "@rollup/rollup-linux-x64-gnu"
+      "@rollup/rollup-linux-x64-gnu",
+      "react-big-calendar"
     ],
     esbuildOptions: {
-      target: "es2020", // Consistente com tsconfig
+      target: "es2022", // Alinhado com tsconfig.node.json
+      supported: {
+        'top-level-await': true // Suporte a top-level await
+      },
     },
   },
   esbuild: {
-    jsx: "automatic", // Equivalente a react-jsx
+    target: "es2022",
+    jsx: "automatic",
+    jsxDev: false, // Desativado para produção
+    jsxImportSource: "react",
+  },
+  css: {
+    modules: {
+      localsConvention: "camelCaseOnly", // Mais estrito
+    },
+    postcss: {
+      plugins: [
+        require("autoprefixer")({
+          overrideBrowserslist: ["defaults and supports es6-module"],
+        }),
+      ],
+    },
+  },
+  define: {
+    "process.env.NODE_ENV": JSON.stringify(process.env.NODE_ENV),
+    __VITE_BUILD_TIME__: JSON.stringify(new Date().toISOString()),
   },
 });

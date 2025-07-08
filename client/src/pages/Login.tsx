@@ -104,7 +104,9 @@ const Login = ({ switchToRegister, closeModal }: Props) => {
           type="button"
           className="btn btn-link"
           onClick={() => {
-            window.location.href = "/api/auth/google";
+            window.location.href = `${
+              import.meta.env.VITE_BACKEND_URL
+            }/api/v1/auth/google`;
           }}
         >
           <svg

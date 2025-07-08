@@ -6,7 +6,7 @@ const Wrapper = styled.div`
     height: 80vh;
     color: white;
     overflow: hidden;
-    background-image: url("../src/assets/images/community.jpg");
+    background-image: url("https://res.cloudinary.com/dunfagpl8/image/upload/v1751953979/community_q0k4y8.jpg");
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;

@@ -6,8 +6,28 @@
       "use": "@vercel/static-build",
       "config": {
         "distDir": "dist",
-        "nodeVersion": "20.x"  // Força Node 20 explicitamente
+        "nodeVersion": "20.x",
+        "installCommand": "npm install --legacy-peer-deps --force",
+        "buildCommand": "npm run build"
       }
     }
-  ]
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "http://seu-backend.com/api/$1", // Substitua pela URL real do seu backend
+      "methods": ["GET", "POST", "PUT", "DELETE"]
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/dist/$1",
+      "headers": {
+        "Cache-Control": "s-maxage=3600, stale-while-revalidate=86400"
+      }
+    }
+  ],
+  "env": {
+    "NODE_ENV": "production",
+    "VITE_API_BASE_URL": "/api" // Compatível com sua configuração de proxy
+  }
 }

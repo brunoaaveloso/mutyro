@@ -4,17 +4,20 @@ import { nodePolyfills } from "vite-plugin-node-polyfills";
 import path from "path";
 
 export default defineConfig({
-  base: "/", // Configuração essencial para o Vercel
+  base: "/",
   plugins: [
-    react(),
+    react({
+      jsxImportSource: "react", // Alinhado com seu tsconfig.app.json (react-jsx)
+    }),
     nodePolyfills({
       protocolImports: true,
     }),
   ],
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./src"), // Caminho absoluto mais seguro
+      "@": path.resolve(__dirname, "./src"), // Alinhado com paths do tsconfig
     },
+    extensions: [".ts", ".tsx", ".js", ".jsx"], // Compatível com moduleResolution bundler
   },
   server: {
     host: true,
@@ -29,9 +32,9 @@ export default defineConfig({
     },
   },
   build: {
-    outDir: "dist", // Explícito para o Vercel
-    emptyOutDir: true, // Limpa o diretório antes de buildar
-    target: "es2020",
+    target: "es2020", // Alinhado com seu tsconfig
+    outDir: "dist",
+    emptyOutDir: true,
     rollupOptions: {
       external: [
         /^node:.*/,
@@ -42,12 +45,13 @@ export default defineConfig({
           react: ["react", "react-dom"],
           leaflet: ["leaflet", "react-leaflet"],
           utils: ["date-fns", "lodash.debounce", "clsx"],
-          vendor: ["axios", "react-router-dom"], // Adicionado para melhor cache
+          vendor: ["axios", "react-router-dom"],
         },
-        chunkFileNames: "assets/[name]-[hash].js", // Nomeação consistente
+        format: "esm", // Alinhado com module ESNext
+        chunkFileNames: "assets/[name]-[hash].js",
       },
     },
-    chunkSizeWarningLimit: 2000, // Aumentado para projetos grandes
+    chunkSizeWarningLimit: 2000,
   },
   optimizeDeps: {
     include: [
@@ -55,21 +59,16 @@ export default defineConfig({
       "react-dom",
       "react-router-dom",
       "styled-components",
-      "lucide-react" // Adicionado para otimização
+      "lucide-react"
     ],
     exclude: [
-      "@rollup/rollup-linux-x64-gnu",
-      "react-big-calendar" // Melhora tempo de build
+      "@rollup/rollup-linux-x64-gnu"
     ],
-  },
-  css: {
-    modules: {
-      localsConvention: "camelCase",
+    esbuildOptions: {
+      target: "es2020", // Consistente com tsconfig
     },
-    preprocessorOptions: {
-      scss: {
-        additionalData: `@import "@/styles/variables.scss";` // Se usar SCSS
-      }
-    }
-  }
+  },
+  esbuild: {
+    jsx: "automatic", // Equivalente a react-jsx
+  },
 });

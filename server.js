@@ -81,8 +81,11 @@ async function iniciarVerificacaoPeriodica() {
 
 app.use(
   cors({
-    origin: "http://localhost:5173", // URL do seu frontend
-    credentials: true, // Permite enviar cookies
+    origin: [
+      "http://localhost:5173", // Dev
+      "https://mutyro.vercel.app" // Produção
+    ],
+    credentials: true,
   })
 );
 

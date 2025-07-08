@@ -6,7 +6,7 @@ import axios from "axios";
 // Por exemplo, se você fizer uma requisição para "/users",
 // a URL completa será "http://localhost:5000/api/v1/users"
 const customFetch = axios.create({
-  baseURL: "/api/v1",
+  baseURL: "/api",
   withCredentials: true,
 });
 
@@ -14,7 +14,7 @@ const customFetch = axios.create({
 customFetch.interceptors.request.use((config) => {
   // Para requisições FormData, não definir Content-Type
   if (config.data instanceof FormData) {
-    delete config.headers['Content-Type'];
+    delete config.headers["Content-Type"];
   }
   return config;
 });
@@ -22,11 +22,11 @@ customFetch.interceptors.request.use((config) => {
 // Interceptor para respostas
 customFetch.interceptors.response.use(
   (response) => {
-    console.log('Resposta recebida:', response);
+    console.log("Resposta recebida:", response);
     return response;
   },
   (error) => {
-    console.error('Erro na requisição:', error);
+    console.error("Erro na requisição:", error);
     return Promise.reject(error);
   }
 );

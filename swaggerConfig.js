@@ -1,4 +1,20 @@
 import swaggerJSDoc from "swagger-jsdoc";
+import * as dotenv from "dotenv";
+dotenv.config();
+
+const servers = [
+  {
+    url: "http://localhost:5100",
+    description: "Servidor de Desenvolvimento Local",
+  },
+];
+
+if (process.env.NODE_ENV === "production") {
+  servers.unshift({
+    url: process.env.API_URL, // Variável de ambiente que você vai criar no Railway
+    description: "Servidor de Produção (Railway)",
+  });
+}
 
 const options = {
   definition: {
@@ -8,11 +24,7 @@ const options = {
       version: "1.0.0",
       description: "Documentação da API de Mutirões Comunitários",
     },
-    servers: [
-      {
-        url: "http://localhost:5100/api/v1",
-      },
-    ],
+    servers: servers, // Usa a lista de servidores dinâmica
     components: {
       securitySchemes: {
         cookieAuth: {

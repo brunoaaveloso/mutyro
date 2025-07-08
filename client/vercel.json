@@ -4,10 +4,10 @@
     {
       "src": "package.json",
       "use": "@vercel/static-build",
-      "config": { "distDir": "dist" }
+      "config": {
+        "distDir": "dist",
+        "nodeVersion": "20.x"  // Força Node 20 explicitamente
+      }
     }
-  ],
-  "build": {
-    "env": { "NODE_ENV": "production" }
-  }
+  ]
 }

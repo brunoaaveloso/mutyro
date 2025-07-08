@@ -14,15 +14,17 @@
   ],
   "routes": [
     {
-      "handle": "filesystem"
-    },
+      "src": "/(.*)",
+      "dest": "/client/dist/$1",
+      "headers": {
+        "Cache-Control": "s-maxage=31536000, immutable"
+      }
+    }
+  ],
+  "rewrites": [
     {
-      "src": "/api/.*",
-      "dest": "https://seu-backend.vercel.app/api/$1"
-    },
-    {
-      "src": "/.*",
-      "dest": "/client/dist/index.html"
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ]
 }

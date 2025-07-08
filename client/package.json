@@ -5,14 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",  // Alterado para garantir a compilação TypeScript
+    "build": "tsc && vite build",
     "lint": "eslint .",
-    "preview": "vite preview",
-    "postinstall": "vite optimize --force"  // Removido o 'npx' para maior confiabilidade
-  },
-  "engines": {
-    "node": ">=20.0.0",
-    "npm": ">=10.0.0"
+    "preview": "vite preview"
   },
   "dependencies": {
     "@types/socket.io-client": "^1.4.36",
@@ -59,8 +54,6 @@
     "postcss": "^8.5.3",
     "tailwindcss": "^4.1.6",
     "typescript": "~5.7.2",
-    "typescript-eslint": "^8.24.1",
     "vite": "^6.2.0"
-    "vite-plugin-node-polyfills": "^0.25.0"
   }
 }

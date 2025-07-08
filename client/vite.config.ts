@@ -1,13 +1,12 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
-import path from "path";
 
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./src"),
+      "@": "/src", // caminho absoluto para src, sem usar path ou __dirname
     },
   },
   server: {
@@ -15,7 +14,7 @@ export default defineConfig({
     port: 5173,
     proxy: {
       "/api": {
-        //target: "http://backend:5100", //quando for buildar o container e colocar online, trocar para isso
+        //target: "http://backend:5100",
         target: "http://localhost:5100",
         changeOrigin: true,
         secure: false,

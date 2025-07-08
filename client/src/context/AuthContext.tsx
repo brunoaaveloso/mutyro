@@ -22,7 +22,6 @@ type Usuario = {
 
 type AuthContextType = {
   usuario: Usuario | null;
-  setUsuario: (usuario: Usuario | null) => void;
   isLoading: boolean;
   login: (token: string) => Promise<void>;
   logout: () => Promise<void>;
@@ -41,44 +40,43 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     } catch (error) {
       setUsuario(null);
       localStorage.removeItem("token");
-    } finally {
-      setIsLoading(false);
     }
   }, []);
 
-  const login = async (token: string) => {
-    localStorage.setItem("token", token);
-    await fetchCurrentUser();
-  };
-
-  const logout = async () => {
-    try {
-      await customFetch.get("/auth/logout");
-      setUsuario(null);
-      localStorage.removeItem("token");
-      toast.success("Logout realizado com sucesso!");
-    } catch (error) {
-      console.error("Erro ao fazer logout:", error);
-      toast.error("Erro ao fazer logout");
-    } finally {
-      window.location.href = "/";
-    }
-  };
+  const login = useCallback(
+    async (token: string) => {
+      localStorage.setItem("token", token);
+      await fetchCurrentUser();
+    },
+    [fetchCurrentUser]
+  );
 
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
       fetchCurrentUser();
-    } else {
-      setIsLoading(false);
     }
+    setIsLoading(false);
   }, [fetchCurrentUser]);
 
-  const contextValue = { usuario, setUsuario, login, logout, isLoading };
+  const logout = useCallback(async () => {
+    try {
+      await customFetch.get("/auth/logout");
+      setUsuario(null);
+      localStorage.removeItem("token");
+      toast.success("Logout realizado com sucesso!");
+      // Força um redirecionamento para garantir que o estado seja limpo em toda a aplicação
+      window.location.href = "/";
+    } catch (error) {
+      console.error("Erro ao fazer logout:", error);
+      toast.error("Erro ao fazer logout");
+    }
+  }, []);
 
   return (
-    <AuthContext.Provider value={contextValue}>
-      {isLoading ? <div>Carregando...</div> : children}
+    <AuthContext.Provider value={{ usuario, login, logout, isLoading }}>
+      {/* Não mostra nada até que a verificação inicial do usuário seja concluída */}
+      {!isLoading && children}
     </AuthContext.Provider>
   );
 };

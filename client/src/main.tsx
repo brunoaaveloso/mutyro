@@ -9,6 +9,11 @@ import axios from "axios";
 
 axios.defaults.withCredentials = true;
 
+console.log(
+  "Configuração global do Axios 'withCredentials' foi definida como:",
+  axios.defaults.withCredentials
+);
+
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <App />

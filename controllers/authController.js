@@ -93,7 +93,8 @@ export const googleCallback = async (req, res) => {
     res.cookie("token", token, {
       httpOnly: true,
       expires: new Date(Date.now() + oneDAY),
-      secure: process.env.NODE_ENV === "production", // Use true em produção
+      secure: true,
+      sameSite: "none",
     });
 
     // Redireciona para a página de usuário no frontend

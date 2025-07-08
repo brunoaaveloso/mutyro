@@ -3,7 +3,7 @@
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "https://mutyro-production.up.railway.app/$1"
+      "dest": "https://mutyro-production.up.railway.app/api/v1/$1"
     },
     {
       "handle": "filesystem"

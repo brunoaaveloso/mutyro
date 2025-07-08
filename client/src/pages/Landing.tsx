@@ -2,11 +2,11 @@ import Wrapper from "../assets/wrappers/LandingPage";
 import { Hero, Blog } from "../components";
 
 import { useLoaderData } from "react-router-dom";
-import publicFetch from "../utils/publicFetch";
+import customFetch from "../utils/customFetch";
 
 export const loader = async () => {
   try {
-    const res = await publicFetch("/mutiroes/todos");
+    const res = await customFetch("/mutiroes/todos");
     return { mutiroes: res.data.mutiroes };
   } catch (err) {
     console.error("Erro ao carregar mutirões:", err);

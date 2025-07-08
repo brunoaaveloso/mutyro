@@ -68,40 +68,27 @@ export const login = async (req, res) => {
 
 export const googleCallback = async (req, res) => {
   try {
-    // Verifica se o usuário já existe no banco de dados
     let usuario = await Usuario.findOne({ email: req.user.email });
-
     if (!usuario) {
-      // Cria um novo usuário se ele não existir
       usuario = await Usuario.create({
         nome: req.user.displayName,
         email: req.user.email,
-        senha: null, // Senha não é necessária para login via Google
+        senha: null,
       });
     }
 
-    // Gera um token JWT
     const token = createJWT({
       userId: usuario._id,
       nome: usuario.nome,
       isAdmin: usuario.isAdmin,
     });
 
-    const oneDAY = 1000 * 60 * 60 * 24;
-
-    // Define o cookie com o token JWT
-    res.cookie("token", token, {
-      httpOnly: true,
-      expires: new Date(Date.now() + oneDAY),
-      secure: true,
-      sameSite: "none",
-    });
-
-    // Redireciona para a página de usuário no frontend
-    res.redirect(`${process.env.FRONTEND_URL}/user`);
+    res.redirect(
+      `${process.env.FRONTEND_URL}/google-auth-callback?token=${token}`
+    );
   } catch (error) {
-    console.error("Erro ao processar autenticação via Google:", error);
-    res.redirect(process.env.FRONTEND_URL || "/"); // Redireciona para a página inicial em caso de erro
+    console.error("ERRO NO GOOGLE CALLBACK:", error);
+    res.redirect(`${process.env.FRONTEND_URL}/login-falhou?erro=google`);
   }
 };
 

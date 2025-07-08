@@ -7,26 +7,21 @@ import axios from "axios";
 // a URL completa será "http://localhost:5000/api/v1/users"
 const customFetch = axios.create({
   baseURL: "/api",
-  withCredentials: true,
 });
 
-// Adicione um interceptor de requisição
-customFetch.interceptors.request.use((config) => {
-  // Para requisições FormData, não definir Content-Type
-  if (config.data instanceof FormData) {
-    delete config.headers["Content-Type"];
-  }
-  return config;
-});
-
-// Interceptor para respostas
-customFetch.interceptors.response.use(
-  (response) => {
-    console.log("Resposta recebida:", response);
-    return response;
+// Interceptor que será executado ANTES de cada requisição
+customFetch.interceptors.request.use(
+  (config) => {
+    // Pega o token do localStorage
+    const token = localStorage.getItem("token");
+    if (token) {
+      // Adiciona o token ao cabeçalho Authorization
+      config.headers["Authorization"] = `Bearer ${token}`;
+      console.log("Token adicionado ao cabeçalho da requisição.");
+    }
+    return config;
   },
   (error) => {
-    console.error("Erro na requisição:", error);
     return Promise.reject(error);
   }
 );

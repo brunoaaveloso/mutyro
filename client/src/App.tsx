@@ -8,6 +8,7 @@ import {
   VisualizarMutirao,
   Notificacoes,
   Sobre,
+  GoogleAuthCallback,
 } from "./pages";
 import { AuthProvider } from "./context/AuthContext";
 import EditarMutirao from "./pages/EditarMutirao";
@@ -106,6 +107,10 @@ const router = createBrowserRouter([
       {
         path: "redefinir-senha/:token",
         element: <RedefinirSenha />,
+      },
+      {
+        path: "google-auth-callback",
+        element: <GoogleAuthCallback />,
       },
     ],
   },

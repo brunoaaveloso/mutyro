@@ -13,3 +13,4 @@ export { default as Configuracoes } from "./Configuracoes";
 export { default as PoliticaPrivacidade } from "./PoliticaPrivacidade";
 export { default as TermosUso } from "./TermosUso";
 export { default as Sobre } from "./Sobre";
+export { default as GoogleAuthCallback } from "./GoogleAuthCallback";

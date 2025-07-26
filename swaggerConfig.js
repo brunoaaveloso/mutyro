@@ -11,8 +11,8 @@ const servers = [
 
 if (process.env.NODE_ENV === "production") {
   servers.unshift({
-    url: process.env.API_URL, // Variável de ambiente que você vai criar no Railway
-    description: "Servidor de Produção (Railway)",
+    url: process.env.API_URL,
+    description: "Servidor de Produção",
   });
 }
 
